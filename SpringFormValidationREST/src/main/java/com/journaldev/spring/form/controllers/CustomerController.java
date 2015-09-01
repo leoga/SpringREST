@@ -102,7 +102,7 @@ public class CustomerController {
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String homePage(final Model model) {
-        LOGGER.info("Returning home.jsp page");
+        LOGGER.info("Returning RestHome.jsp page");
         return "RestHome";
     }
     

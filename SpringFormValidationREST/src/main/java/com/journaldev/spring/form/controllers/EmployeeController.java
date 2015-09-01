@@ -10,11 +10,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -77,10 +81,10 @@ public class EmployeeController {
     
     /* REST*/
     @RequestMapping(value = RestURIConstants.CREATE_EMP, method = RequestMethod.POST)
-    public @ResponseBody Employee createEmployee(@RequestBody Employee emp) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public @ResponseBody ResponseEntity<?> createEmployee(@RequestBody Employee emp) throws NoSuchAlgorithmException, UnsupportedEncodingException {
     	LOGGER.info("Starting createEmployee");
     	facade.addEmployee(emp);
-        return emp;
+        return new ResponseEntity<Employee>(emp, HttpStatus.CREATED);
     }
     
     @RequestMapping(value = RestURIConstants.EDIT_EMP, method = RequestMethod.PUT)
@@ -160,7 +164,7 @@ public class EmployeeController {
     }
     
     @RequestMapping(value = RestURIConstants.GET_SEARCH_CUST, method = RequestMethod.GET)
-    public @ResponseBody List<Customer> getSearchEmp(@PathVariable("id") int empId,
+    public @ResponseBody Object[] getSearchEmp(@PathVariable("id") int empId,
     												 @RequestParam(value="page", required = false)    final Integer start,
     												 @RequestParam(value="byname", required = false, defaultValue="vacio")	String byname, 
     												 @RequestParam(value="byagehigh", required = false) final Integer byagehigh, 
@@ -171,17 +175,25 @@ public class EmployeeController {
     	if(byname.equals("vacio")){
     		byname = null;	
     	}
+    	LOGGER.info("Page: "+start);
+    	LOGGER.info("byname: "+byname);
+    	LOGGER.info("byagehigh: "+byagehigh);
+    	LOGGER.info("byagelow: "+byagelow);
+    	LOGGER.info("bydatelow: "+bydatelow);
+    	LOGGER.info("bydatehigh: "+bydatehigh);
 
     	SearchFields sfields = new SearchFields(byname, byagehigh, byagelow, bydatelow, bydatehigh);
  
         Employee currentEmployee = facade.getEmployeebyId(empId).get(0);
         final Object[] array = facade.search(sfields, start, currentEmployee);
-
+        LOGGER.info("respuesta: "+array.length);
         final int[] pagParams = (int[]) array[0];
-
+        Object[] response = new Object[2];
         final List<Customer> listing = (List<Customer>) array[1];
-  
-    	return listing;
+        response[0] = pagParams;
+        response[1] = listing;
+        //return ResponseEntity<Customer>(listing);
+    	return response;
     }
     
     @RequestMapping(value = RestURIConstants.GET_CUSTOMERS_EMP, method = RequestMethod.GET)

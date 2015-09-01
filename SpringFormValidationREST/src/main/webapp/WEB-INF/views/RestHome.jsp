@@ -6,7 +6,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <html>
 	<head>
-		  <meta charset="ISO-8859-1">
+
 		  <title>Rest Home</title>
 		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		  <script type="text/javascript" src="<c:url value="/resources/home.js"/>"></script>
@@ -27,11 +27,11 @@
 				<h5><fmt:message key="hello"/> <s></s> <fmt:message key="set.filters"/></h5>
 			</div>
 			<div class="form-inline" role="form">
-			<div class="form-group" id="wrapp">
+<!-- 			<div class="form-group" id="wrapp">
 		    	<label class="control-label">Page:</label> 
 		    	<p></p>                
 				<input name="page" type="number" class="formlarge form-control" path="page" /> 
-		    </div>
+		    </div> -->
 			<div class="form-group" id="wrapp">
 		    	<label class="control-label"><fmt:message key="search.name"/>:</label> 
 		    	<p></p>                
@@ -55,17 +55,26 @@
 
 	</div>
 	</form>
+	<div >
 	<div id = "respuesta"></div>
-		
+	<p></p>
+	<p></p>
+	<div class="col-md"></div>
+	<div class="col-md" id="paginador" align="right"></div>
+	<p></p>
+	<p></p>
+	<div  aling="center">	
 	<table align="center"   width="50%">
 		<tr>
 	   		<td ><input class="btn btn-primary" type="button" onClick="check(1)" value="Get single Employee"></td>
 			<td ><input class="btn btn-primary" type="button" onClick="check(2)" value="Get all Employees"></td>
 			<td ><input class="btn btn-primary" type="button" onClick="check(3)" value="Get single Customer"></td>
 			<td ><input class="btn btn-primary" type="button" onClick="check(4)"value="Get all Customers"></td> 
+			<td ><input class="btn btn-primary" type="button" onClick="actualizarDatos('http://localhost:8080/spring/api/emp/1/customer/search?&byname=&byagelow=&byagehigh=&bydatelow=2015-08-01&bydatehigh=2015-09-01&page=2')" value="Actualizar tabla"></td>
 			<!-- <button class="btn btn-primary" onClick="check(1)" value="Listar Customers"></button> -->
 		</tr>
 	</table>
-	
+	</div>
+	</div>
 	</body>
 </html>
