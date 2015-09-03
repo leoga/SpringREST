@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import com.journaldev.spring.form.login.Login;
 import com.journaldev.spring.form.model.Customer;
 import com.journaldev.spring.form.model.Employee;
+import com.journaldev.spring.form.search.Page;
+import com.journaldev.spring.form.search.PageInfo;
 import com.journaldev.spring.form.search.SearchFields;
 import com.journaldev.spring.form.service.CustomerService;
 import com.journaldev.spring.form.service.EmployeeService;
@@ -50,30 +52,33 @@ public class ServiceFacade {
      * @param start necessary for pagination
      * @param currentEmployee necessary for query
      */
-	public Object[] search(final SearchFields modDel, final int start, final Employee currentEmployee){
-		final SearchFields sfields= modDel;
+	public Page search(final SearchFields sfields, final int start, final Employee currentEmployee){
+		//final SearchFields sfields= modDel;
+		//Número de registros por Página
+		PageInfo pageInfo = new PageInfo();
+		pageInfo.setPageSize(2);
 	    if(sfields!=null){
 	      	 if(sfields.getByname()!=null && sfields.getByagehigh()==null && sfields.getByagelow()==null && sfields.getBydatehigh()==null && sfields.getBydatelow()==null){
 	      		 final List<Customer> searching = customers.getCustomersbyName(currentEmployee.getId(), sfields.getByname());
-	      		 return paginationSearch(currentEmployee, searching, start, sfields, 2, 1);
+	      		 return paginationSearch(currentEmployee, searching, start, sfields, pageInfo, 1);
 	      	 }
 	      	 else if(sfields.getByagehigh()!=null && sfields.getByagelow()!=null && sfields.getByname()==null && sfields.getBydatehigh()==null && sfields.getBydatelow()==null) {
 	      		 final List<Customer> searching = customers.getCustomersbyAge(currentEmployee.getId(), sfields.getByagehigh(), sfields.getByagelow());
-	      		 return paginationSearch(currentEmployee, searching, start, sfields, 2, 2);
+	      		 return paginationSearch(currentEmployee, searching, start, sfields, pageInfo, 2);
 	      	 }
 	      	 else if(sfields.getBydatehigh()!=null && sfields.getBydatelow()!=null && sfields.getByname()==null && sfields.getByagehigh()==null && sfields.getByagelow()==null){
 	      		final Timestamp[] dates= timestampConverter(sfields.getBydatehigh(), sfields.getBydatelow());
 	      		final Timestamp timehigh = dates[0];
 	      		final Timestamp timelow = dates[1];
 	      		final List<Customer> searching = customers.getCustomersbyDate(currentEmployee.getId(), timehigh, timelow);
-	      		return paginationSearch(currentEmployee, searching, start, sfields, 2, 3);
+	      		return paginationSearch(currentEmployee, searching, start, sfields, pageInfo, 3);
 	      	 }
 	      	 else {
 	      		 final List<Customer> searching = customers.getCustomersbyNameAge(currentEmployee.getId(), sfields.getByname(), sfields.getByagehigh(), sfields.getByagelow());
-	      		 return paginationSearch(currentEmployee, searching, start,  sfields, 2, 4);
+	      		 return paginationSearch(currentEmployee, searching, start,  sfields, pageInfo, 4);
 	      	 }
 	       }
-	    return new Object[0];
+	    return new Page();
 	}
 	
 	
@@ -409,10 +414,11 @@ public class ServiceFacade {
      * @param numregist number of registers to be listed by page
      * @param type necessary for switch function
      */
-	public Object[] paginationSearch(final Employee currentEmployee, final List<Customer> searching, 
-								 final int start, final SearchFields sfields, final int numregist, final int type){
+	public Page paginationSearch(final Employee currentEmployee, final List<Customer> searching, 
+								 final int start, final SearchFields sfields, PageInfo pageInfo, final int type){
 	  	 final int num = searching.size();
 	  	 int pages;
+	  	 int numregist = pageInfo.getPageSize();
 	  	 if(num%numregist == 0){
 	  		 pages= num/numregist;
 	  	 }else{
@@ -420,37 +426,36 @@ public class ServiceFacade {
 	  	 }
 	  	 int ncustomers;
 	  	 if(searching.isEmpty()){
-	  		 ncustomers = searching.size();
+	  		ncustomers=0;	 
 	  	 }else{	 
-	  		 ncustomers=0;  		 
+	  		ncustomers = searching.size();   		 
 	  	 }
-	  	 int[] pagParams = new int [3];
-	  	 pagParams[0] = start;
-	  	 pagParams[1] = pages;
-	  	 pagParams[2] = ncustomers;
-	  	 Object[] array = new Object[2];
-	  	 array[0] = pagParams; 
+	  	 
+	  	 //pageInfo = new PageInfo(start, ncustomers, pages);
+	  	 pageInfo.setPageNumber(start);
+	  	 pageInfo.setNumberOfPages(pages);
+	  	 pageInfo.setNumberOfElements(ncustomers);
 
 	  	 if(!searching.isEmpty()){
 	  		 switch(type){
-	  		 case 1: array[1] = customers.getCustomersbyNameLimit(currentEmployee.getId(), sfields.getByname(), numregist*(start-1), numregist);
-	  		 		 return array;
-	  		 		 //model.addAttribute("listing",listing); break;
-	  		 case 2: array[1] = customers.getCustomersbyAgeLimit(currentEmployee.getId(), sfields.getByagehigh(), sfields.getByagelow(), numregist*(start-1), numregist);
-	  		 		 return array;
-	  		 		 //model.addAttribute("listing",listing2); break;
+	  		 case 1: List<Customer> content1 = customers.getCustomersbyNameLimit(currentEmployee.getId(), sfields.getByname(), numregist*(start-1), numregist);
+	  		 		 return new Page(pageInfo, content1);
+	  		 		 
+	  		 case 2: List<Customer> content2 = customers.getCustomersbyAgeLimit(currentEmployee.getId(), sfields.getByagehigh(), sfields.getByagelow(), numregist*(start-1), numregist);
+	  		 		 return new Page(pageInfo, content2);
+	  		 		 
 	  		 case 3: final Timestamp[] dates = this.timestampConverter(sfields.getBydatehigh(), sfields.getBydatelow());
 	  			 	 final Timestamp timehigh = dates[0];
 	  		 		 final Timestamp timelow = dates[1];
-	  		 		 array[1] = customers.getCustomersbyDateLimit(currentEmployee.getId(),timehigh, timelow, numregist*(start-1), numregist);
-	  		 		 return array;
-	   		 		 //model.addAttribute("listing",listing3); break;
-	  		 case 4: array[1] = customers.getCustomersbyNameAgeLimit(currentEmployee.getId(), sfields.getByname(), sfields.getByagehigh(), sfields.getByagelow(), numregist*(start-1), numregist);
-	  		 		 return array;
-	  		 		 //model.addAttribute("listing",listing4); break;	 
+	  		 		 List<Customer> content3 = customers.getCustomersbyDateLimit(currentEmployee.getId(),timehigh, timelow, numregist*(start-1), numregist);
+	  		 		 return new Page(pageInfo, content3);
+	  		 		 
+	  		 case 4: List<Customer> content4 = customers.getCustomersbyNameAgeLimit(currentEmployee.getId(), sfields.getByname(), sfields.getByagehigh(), sfields.getByagelow(), numregist*(start-1), numregist);
+	  		 		 return new Page(pageInfo, content4); 
+	  		 		 
 	  		 }
 	  	  }
-	  	  return new Object[0];
+	  	  return new Page();
 	   }
 
 }

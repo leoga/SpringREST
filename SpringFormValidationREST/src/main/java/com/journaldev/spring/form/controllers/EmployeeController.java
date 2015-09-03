@@ -38,6 +38,7 @@ import com.journaldev.spring.form.facade.ServiceFacade;
 import com.journaldev.spring.form.login.Login;
 import com.journaldev.spring.form.model.Customer;
 import com.journaldev.spring.form.model.Employee;
+import com.journaldev.spring.form.search.Page;
 import com.journaldev.spring.form.search.SearchFields;
  
 
@@ -164,7 +165,7 @@ public class EmployeeController {
     }
     
     @RequestMapping(value = RestURIConstants.GET_SEARCH_CUST, method = RequestMethod.GET)
-    public @ResponseBody Object[] getSearchEmp(@PathVariable("id") int empId,
+    public @ResponseBody Page getSearchEmp(@PathVariable("id") int empId,
     												 @RequestParam(value="page", required = false)    final Integer start,
     												 @RequestParam(value="byname", required = false, defaultValue="vacio")	String byname, 
     												 @RequestParam(value="byagehigh", required = false) final Integer byagehigh, 
@@ -175,25 +176,19 @@ public class EmployeeController {
     	if(byname.equals("vacio")){
     		byname = null;	
     	}
-    	LOGGER.info("Page: "+start);
-    	LOGGER.info("byname: "+byname);
-    	LOGGER.info("byagehigh: "+byagehigh);
-    	LOGGER.info("byagelow: "+byagelow);
-    	LOGGER.info("bydatelow: "+bydatelow);
-    	LOGGER.info("bydatehigh: "+bydatehigh);
 
     	SearchFields sfields = new SearchFields(byname, byagehigh, byagelow, bydatelow, bydatehigh);
  
         Employee currentEmployee = facade.getEmployeebyId(empId).get(0);
-        final Object[] array = facade.search(sfields, start, currentEmployee);
-        LOGGER.info("respuesta: "+array.length);
-        final int[] pagParams = (int[]) array[0];
+        final Page page = facade.search(sfields, start, currentEmployee);
+        //LOGGER.info("respuesta: "+array.length);
+       /* final int[] pagParams = (int[]) array[0];
         Object[] response = new Object[2];
         final List<Customer> listing = (List<Customer>) array[1];
         response[0] = pagParams;
         response[1] = listing;
-        //return ResponseEntity<Customer>(listing);
-    	return response;
+        //return ResponseEntity<Customer>(listing);*/
+    	return page;
     }
     
     @RequestMapping(value = RestURIConstants.GET_CUSTOMERS_EMP, method = RequestMethod.GET)
@@ -454,7 +449,7 @@ public class EmployeeController {
 	 * @param start value needed in order to paginate the result
 	 * @param model necessary in order to update data from/to jsp page
 	 */
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
 	@RequestMapping(value = "search", method = RequestMethod.GET)
     public String getSearch(@RequestParam(value="page") final int start, final Model model, final HttpSession session){
     	final Employee currentEmployee = this.getCurrentEmployee(session);
@@ -490,7 +485,7 @@ public class EmployeeController {
 	   	model.addAttribute("currentemployee", currentEmployee);
 	   	model.addAttribute("Searchfields", new SearchFields());
 	   	return "search";
-    }
+    }*/
     
 	/**
 	 * List related customers by date, name, or age
@@ -498,7 +493,7 @@ public class EmployeeController {
 	 * @param modDel search parameters collected by the form
 	 * @param model necessary in order to update data from/to jsp page
 	 */
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
 	@RequestMapping(value = "search", method = RequestMethod.POST)
     public String doSearch(@RequestParam(value="page") final int start, 
     		@ModelAttribute("Searchfields") final SearchFields sfields, final Model model, final HttpSession session) {	
@@ -507,7 +502,7 @@ public class EmployeeController {
     //model.addAttribute("sfields", sfields);
     /*if(modDel!=null){
     	sfields=modDel;
-    }*/
+    }
     if(sfields.getBydatehigh()!=null && sfields.getBydatelow()!=null){
     	final Timestamp[] dates = facade.timestampConverter(sfields.getBydatehigh(), sfields.getBydatelow());
   		model.addAttribute("timehigh", dates[0]);
@@ -528,7 +523,7 @@ public class EmployeeController {
     model.addAttribute("sfields", sfields);
     pagesearchlist= start;
     return "search";
-    }
+    }*/
     
 	/**
 	 * Return a form in order to modify a customer listed by "Search" function
