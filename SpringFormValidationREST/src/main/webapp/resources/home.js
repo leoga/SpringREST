@@ -143,6 +143,7 @@ function hacerTabla(data, param){
 
 		
 	//Pintar Cabeceras
+	
 	for(var i = 0; i<1; i++){
 		var o = data[i];
 		// function pintarObjeto(o) {
