@@ -28,7 +28,7 @@ function check(v)
 	            url: "http://localhost:8080/spring/api/cust/1"
 	        }).then(function(data) {
 	        	var param = ["name", "email", "age", "gender", "birthday", "phone"];
-	        	hacerTabla(data, param)
+	        	pintarObjeto(data, param)
 	        });
 	 } else if (v==4){
 	        $.ajax({
